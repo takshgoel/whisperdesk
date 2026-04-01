@@ -1,0 +1,20 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.egg-info/
+.env
+
+# App runtime files
+whisperdesk/temp/
+whisperdesk/whisperdesk.log
+
+# PyInstaller build output
+whisperdesk/build/
+whisperdesk/dist/
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini

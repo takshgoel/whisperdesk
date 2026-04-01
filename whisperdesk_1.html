@@ -1,0 +1,862 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WhisperDesk — Local Speech-to-Text for Windows</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #FAFAF8;
+    --surface: #FFFFFF;
+    --border: #E8E6E0;
+    --border-strong: #D0CEC8;
+    --text-primary: #1A1A18;
+    --text-secondary: #6B6860;
+    --text-muted: #9E9C96;
+    --accent: #1A1A18;
+    --accent-hover: #3A3A36;
+    --green: #2D6A4F;
+    --green-bg: #EAF3EE;
+    --green-border: #B7D9C7;
+    --font-sans: 'DM Sans', sans-serif;
+    --font-mono: 'DM Mono', monospace;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: var(--font-sans);
+    background: var(--bg);
+    color: var(--text-primary);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* NAV */
+  nav {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: rgba(250, 250, 248, 0.92);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+    padding: 0 2rem;
+    height: 56px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .nav-logo {
+    font-size: 15px;
+    font-weight: 500;
+    letter-spacing: -0.01em;
+    color: var(--text-primary);
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .nav-logo-mark {
+    width: 24px;
+    height: 24px;
+    background: var(--text-primary);
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .nav-logo-mark svg { display: block; }
+
+  .nav-links {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+    list-style: none;
+  }
+
+  .nav-links a {
+    font-size: 14px;
+    color: var(--text-secondary);
+    text-decoration: none;
+    transition: color 0.15s;
+  }
+
+  .nav-links a:hover { color: var(--text-primary); }
+
+  .nav-cta {
+    background: var(--text-primary) !important;
+    color: var(--bg) !important;
+    padding: 7px 16px !important;
+    border-radius: 8px !important;
+    font-weight: 500 !important;
+    font-size: 13px !important;
+    transition: background 0.15s !important;
+  }
+
+  .nav-cta:hover { background: var(--accent-hover) !important; }
+
+  /* HERO */
+  .hero {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 120px 2rem 80px;
+    text-align: center;
+  }
+
+  .hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--green-bg);
+    border: 1px solid var(--green-border);
+    color: var(--green);
+    font-size: 12px;
+    font-weight: 500;
+    padding: 4px 12px;
+    border-radius: 100px;
+    margin-bottom: 32px;
+    letter-spacing: 0.02em;
+  }
+
+  .badge-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--green);
+    animation: pulse 2s ease-in-out infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+
+  h1 {
+    font-size: clamp(36px, 6vw, 58px);
+    font-weight: 300;
+    line-height: 1.1;
+    letter-spacing: -0.03em;
+    color: var(--text-primary);
+    margin-bottom: 20px;
+  }
+
+  h1 em {
+    font-style: italic;
+    font-weight: 300;
+  }
+
+  .hero-sub {
+    font-size: 18px;
+    color: var(--text-secondary);
+    font-weight: 300;
+    max-width: 480px;
+    margin: 0 auto 48px;
+    line-height: 1.65;
+  }
+
+  .hero-actions {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  .btn-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--text-primary);
+    color: var(--bg);
+    padding: 12px 24px;
+    border-radius: 10px;
+    font-size: 15px;
+    font-weight: 500;
+    text-decoration: none;
+    transition: background 0.15s, transform 0.1s;
+    cursor: pointer;
+    border: none;
+  }
+
+  .btn-primary:hover { background: var(--accent-hover); transform: translateY(-1px); }
+  .btn-primary:active { transform: translateY(0); }
+
+  .btn-secondary {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: transparent;
+    color: var(--text-secondary);
+    padding: 12px 20px;
+    border-radius: 10px;
+    font-size: 15px;
+    font-weight: 400;
+    text-decoration: none;
+    border: 1px solid var(--border-strong);
+    transition: border-color 0.15s, color 0.15s;
+    cursor: pointer;
+  }
+
+  .btn-secondary:hover { color: var(--text-primary); border-color: var(--text-primary); }
+
+  .hero-note {
+    margin-top: 16px;
+    font-size: 13px;
+    color: var(--text-muted);
+  }
+
+  /* APP WINDOW MOCKUP */
+  .mockup-section {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 0 2rem 100px;
+  }
+
+  .app-window {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    overflow: hidden;
+    box-shadow: 0 2px 40px rgba(0,0,0,0.06), 0 1px 4px rgba(0,0,0,0.04);
+  }
+
+  .window-bar {
+    background: #F2F0EB;
+    border-bottom: 1px solid var(--border);
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .window-dots { display: flex; gap: 6px; }
+
+  .window-dot {
+    width: 11px;
+    height: 11px;
+    border-radius: 50%;
+  }
+
+  .dot-red { background: #FF5F57; }
+  .dot-yellow { background: #FFBD2E; }
+  .dot-green { background: #28C840; }
+
+  .window-title {
+    font-size: 13px;
+    color: var(--text-secondary);
+    font-family: var(--font-mono);
+    flex: 1;
+    text-align: center;
+    margin-right: 52px;
+  }
+
+  .window-body {
+    padding: 24px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+  }
+
+  .window-panel {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px;
+  }
+
+  .panel-label {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 12px;
+  }
+
+  .mode-toggle {
+    display: flex;
+    background: var(--border);
+    border-radius: 8px;
+    padding: 3px;
+    gap: 2px;
+    margin-bottom: 16px;
+  }
+
+  .mode-btn {
+    flex: 1;
+    text-align: center;
+    font-size: 13px;
+    padding: 6px 0;
+    border-radius: 6px;
+    color: var(--text-secondary);
+    cursor: default;
+  }
+
+  .mode-btn.active {
+    background: var(--surface);
+    color: var(--text-primary);
+    font-weight: 500;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+  }
+
+  .record-btn {
+    width: 100%;
+    padding: 10px;
+    border-radius: 8px;
+    background: #FF3B30;
+    color: white;
+    font-size: 13px;
+    font-weight: 500;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 12px;
+  }
+
+  .rec-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: white;
+    animation: pulse 1s ease-in-out infinite;
+  }
+
+  .status-bar-mock {
+    font-size: 11px;
+    color: var(--green);
+    font-family: var(--font-mono);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .transcript-lines {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .t-line {
+    height: 10px;
+    background: var(--border);
+    border-radius: 4px;
+  }
+
+  .t-line.short { width: 65%; }
+  .t-line.medium { width: 85%; }
+  .t-line.full { width: 100%; }
+  .t-line.active {
+    background: linear-gradient(90deg, var(--border) 0%, #C8C4BC 50%, var(--border) 100%);
+    background-size: 200%;
+    animation: shimmer 1.5s ease-in-out infinite;
+    width: 45%;
+  }
+
+  @keyframes shimmer {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+  }
+
+  .toolbar-mock {
+    display: flex;
+    gap: 8px;
+    margin-top: 14px;
+    padding-top: 12px;
+    border-top: 1px solid var(--border);
+  }
+
+  .tool-btn-mock {
+    font-size: 11px;
+    padding: 5px 10px;
+    border-radius: 6px;
+    border: 1px solid var(--border-strong);
+    color: var(--text-secondary);
+  }
+
+  /* FEATURES */
+  .features-section {
+    border-top: 1px solid var(--border);
+    padding: 80px 2rem;
+  }
+
+  .section-inner {
+    max-width: 900px;
+    margin: 0 auto;
+  }
+
+  .section-label {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 48px;
+    text-align: center;
+  }
+
+  .features-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+
+  .feature-cell {
+    background: var(--surface);
+    padding: 28px 24px;
+  }
+
+  .feature-icon {
+    width: 32px;
+    height: 32px;
+    margin-bottom: 14px;
+    color: var(--text-primary);
+  }
+
+  .feature-title {
+    font-size: 15px;
+    font-weight: 500;
+    margin-bottom: 8px;
+    color: var(--text-primary);
+  }
+
+  .feature-desc {
+    font-size: 14px;
+    color: var(--text-secondary);
+    line-height: 1.6;
+    font-weight: 300;
+  }
+
+  /* TRUST */
+  .trust-section {
+    border-top: 1px solid var(--border);
+    padding: 80px 2rem;
+    background: var(--surface);
+  }
+
+  .trust-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 48px;
+    max-width: 700px;
+    margin: 0 auto;
+    text-align: center;
+  }
+
+  .trust-num {
+    font-size: 36px;
+    font-weight: 300;
+    letter-spacing: -0.03em;
+    color: var(--text-primary);
+    display: block;
+    margin-bottom: 4px;
+  }
+
+  .trust-label {
+    font-size: 13px;
+    color: var(--text-secondary);
+    font-weight: 300;
+  }
+
+  /* HOW IT WORKS */
+  .how-section {
+    border-top: 1px solid var(--border);
+    padding: 80px 2rem;
+  }
+
+  .steps {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 40px;
+    margin-top: 48px;
+  }
+
+  .step-num {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-bottom: 10px;
+  }
+
+  .step-title {
+    font-size: 16px;
+    font-weight: 500;
+    margin-bottom: 8px;
+  }
+
+  .step-desc {
+    font-size: 14px;
+    color: var(--text-secondary);
+    font-weight: 300;
+    line-height: 1.6;
+  }
+
+  /* DOWNLOAD */
+  .download-section {
+    border-top: 1px solid var(--border);
+    padding: 100px 2rem;
+    text-align: center;
+  }
+
+  .download-section h2 {
+    font-size: clamp(28px, 4vw, 42px);
+    font-weight: 300;
+    letter-spacing: -0.025em;
+    margin-bottom: 16px;
+  }
+
+  .download-section p {
+    font-size: 16px;
+    color: var(--text-secondary);
+    font-weight: 300;
+    margin-bottom: 40px;
+  }
+
+  .download-card {
+    display: inline-flex;
+    align-items: center;
+    gap: 20px;
+    background: var(--surface);
+    border: 1px solid var(--border-strong);
+    border-radius: 14px;
+    padding: 20px 28px;
+    margin-bottom: 16px;
+  }
+
+  .platform-icon {
+    width: 40px;
+    height: 40px;
+    background: var(--text-primary);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .platform-info { text-align: left; }
+
+  .platform-name {
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--text-primary);
+  }
+
+  .platform-meta {
+    font-size: 13px;
+    color: var(--text-muted);
+    font-family: var(--font-mono);
+  }
+
+  .download-meta {
+    font-size: 13px;
+    color: var(--text-muted);
+  }
+
+  /* FOOTER */
+  footer {
+    border-top: 1px solid var(--border);
+    padding: 32px 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    max-width: 900px;
+    margin: 0 auto;
+  }
+
+  .footer-brand {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-primary);
+  }
+
+  .footer-note {
+    font-size: 13px;
+    color: var(--text-muted);
+  }
+
+  .footer-links {
+    display: flex;
+    gap: 24px;
+  }
+
+  .footer-links a {
+    font-size: 13px;
+    color: var(--text-secondary);
+    text-decoration: none;
+  }
+
+  .footer-links a:hover { color: var(--text-primary); }
+
+  /* RESPONSIVE */
+  @media (max-width: 680px) {
+    .features-grid { grid-template-columns: 1fr; }
+    .trust-grid { grid-template-columns: 1fr; gap: 24px; }
+    .steps { grid-template-columns: 1fr; gap: 28px; }
+    .window-body { grid-template-columns: 1fr; }
+    .nav-links { display: none; }
+    footer { flex-direction: column; gap: 16px; text-align: center; }
+    .footer-links { justify-content: center; }
+  }
+
+  /* FADE IN */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .fade-in { animation: fadeUp 0.5s ease both; }
+  .fade-in-1 { animation-delay: 0.1s; }
+  .fade-in-2 { animation-delay: 0.2s; }
+  .fade-in-3 { animation-delay: 0.3s; }
+  .fade-in-4 { animation-delay: 0.45s; }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="#" class="nav-logo">
+    <div class="nav-logo-mark">
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+        <rect x="1" y="4" width="2" height="6" rx="1" fill="white"/>
+        <rect x="4" y="2" width="2" height="10" rx="1" fill="white"/>
+        <rect x="7" y="5" width="2" height="4" rx="1" fill="white"/>
+        <rect x="10" y="3" width="2" height="8" rx="1" fill="white"/>
+      </svg>
+    </div>
+    WhisperDesk
+  </a>
+  <ul class="nav-links">
+    <li><a href="#features">Features</a></li>
+    <li><a href="#how">How it works</a></li>
+    <li><a href="#download" class="nav-cta">Download</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-badge fade-in fade-in-1">
+    <div class="badge-dot"></div>
+    Free &amp; open source · No API key needed
+  </div>
+
+  <h1 class="fade-in fade-in-2">Your voice, as text.<br><em>Instantly. Offline.</em></h1>
+
+  <p class="hero-sub fade-in fade-in-3">
+    WhisperDesk transcribes your mic or audio files entirely on your Windows PC — no cloud, no subscription, no data leaving your machine.
+  </p>
+
+  <div class="hero-actions fade-in fade-in-4">
+    <a href="#download" class="btn-primary">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+        <path d="M8 2v8M5 8l3 3 3-3M3 13h10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      Download for Windows
+    </a>
+    <a href="#how" class="btn-secondary">See how it works</a>
+  </div>
+  <p class="hero-note fade-in fade-in-4">Windows 10 / 11 · Free · ~140MB</p>
+</section>
+
+<!-- MOCKUP -->
+<section class="mockup-section">
+  <div class="app-window">
+    <div class="window-bar">
+      <div class="window-dots">
+        <div class="window-dot dot-red"></div>
+        <div class="window-dot dot-yellow"></div>
+        <div class="window-dot dot-green"></div>
+      </div>
+      <div class="window-title">WhisperDesk — v1.0</div>
+    </div>
+    <div class="window-body">
+      <div class="window-panel">
+        <div class="panel-label">Input</div>
+        <div class="mode-toggle">
+          <div class="mode-btn active">Mic</div>
+          <div class="mode-btn">File</div>
+        </div>
+        <div class="record-btn">
+          <div class="rec-dot"></div>
+          Recording...
+        </div>
+        <div class="status-bar-mock">
+          <svg width="8" height="8" viewBox="0 0 8 8"><circle cx="4" cy="4" r="3" fill="#2D6A4F"/></svg>
+          Processing audio chunk 3/4
+        </div>
+      </div>
+      <div class="window-panel">
+        <div class="panel-label">Transcript</div>
+        <div class="transcript-lines">
+          <div class="t-line full"></div>
+          <div class="t-line medium"></div>
+          <div class="t-line full"></div>
+          <div class="t-line short"></div>
+          <div class="t-line medium"></div>
+          <div class="t-line active"></div>
+        </div>
+        <div class="toolbar-mock">
+          <div class="tool-btn-mock">Copy</div>
+          <div class="tool-btn-mock">Save .txt</div>
+          <div class="tool-btn-mock">Clear</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section class="features-section" id="features">
+  <div class="section-inner">
+    <div class="section-label">What makes it different</div>
+    <div class="features-grid">
+      <div class="feature-cell">
+        <svg class="feature-icon" viewBox="0 0 32 32" fill="none">
+          <path d="M16 4a4 4 0 0 1 4 4v8a4 4 0 0 1-8 0V8a4 4 0 0 1 4-4z" stroke="currentColor" stroke-width="1.5"/>
+          <path d="M8 16a8 8 0 0 0 16 0M16 24v4M12 28h8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+        <div class="feature-title">Live mic transcription</div>
+        <p class="feature-desc">Press record, start talking. Your words appear as you speak using Whisper AI running locally on your CPU.</p>
+      </div>
+      <div class="feature-cell">
+        <svg class="feature-icon" viewBox="0 0 32 32" fill="none">
+          <rect x="4" y="6" width="24" height="20" rx="3" stroke="currentColor" stroke-width="1.5"/>
+          <path d="M10 14h12M10 19h8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+          <path d="M20 4v4M16 4v4M24 4v4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+        <div class="feature-title">Audio file support</div>
+        <p class="feature-desc">Drop in any MP3, WAV, M4A or OGG file and get a full transcript in seconds. Drag-and-drop or browse.</p>
+      </div>
+      <div class="feature-cell">
+        <svg class="feature-icon" viewBox="0 0 32 32" fill="none">
+          <path d="M28 16a12 12 0 1 1-24 0 12 12 0 0 1 24 0z" stroke="currentColor" stroke-width="1.5"/>
+          <path d="M16 10v6l4 2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+          <path d="M7 7l2 2M23 7l-2 2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+        <div class="feature-title">Fully offline</div>
+        <p class="feature-desc">Whisper runs entirely on your machine. No API calls, no internet required, no usage limits. Ever.</p>
+      </div>
+      <div class="feature-cell">
+        <svg class="feature-icon" viewBox="0 0 32 32" fill="none">
+          <rect x="4" y="8" width="24" height="16" rx="3" stroke="currentColor" stroke-width="1.5"/>
+          <path d="M10 16h12M10 20h7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+        <div class="feature-title">One-click export</div>
+        <p class="feature-desc">Copy the full transcript to clipboard or save it as a .txt file with a timestamped filename instantly.</p>
+      </div>
+      <div class="feature-cell">
+        <svg class="feature-icon" viewBox="0 0 32 32" fill="none">
+          <path d="M8 8h16v16H8z" stroke="currentColor" stroke-width="1.5"/>
+          <path d="M8 12h16M12 12v12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+        <div class="feature-title">Model size selector</div>
+        <p class="feature-desc">Choose between Tiny (fast), Base (balanced), or Small (accurate) depending on your hardware.</p>
+      </div>
+      <div class="feature-cell">
+        <svg class="feature-icon" viewBox="0 0 32 32" fill="none">
+          <path d="M6 26L16 6l10 20" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M9 20h14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+        <div class="feature-title">Zero cost</div>
+        <p class="feature-desc">Free to download and use forever. No account, no subscription, no hidden charges.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TRUST STATS -->
+<section class="trust-section">
+  <div class="trust-grid">
+    <div>
+      <span class="trust-num">0</span>
+      <span class="trust-label">API calls made</span>
+    </div>
+    <div>
+      <span class="trust-num">∞</span>
+      <span class="trust-label">Usage limit</span>
+    </div>
+    <div>
+      <span class="trust-num">$0</span>
+      <span class="trust-label">Cost, forever</span>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="how-section" id="how">
+  <div class="section-inner">
+    <div class="section-label">How it works</div>
+    <div class="steps">
+      <div>
+        <div class="step-num">01</div>
+        <div class="step-title">Download &amp; install</div>
+        <p class="step-desc">Run the installer on Windows 10 or 11. Python and ffmpeg are bundled — nothing else to configure.</p>
+      </div>
+      <div>
+        <div class="step-num">02</div>
+        <div class="step-title">First launch</div>
+        <p class="step-desc">On the first run, WhisperDesk downloads the Whisper model (~140MB). After that, it works completely offline.</p>
+      </div>
+      <div>
+        <div class="step-num">03</div>
+        <div class="step-title">Start transcribing</div>
+        <p class="step-desc">Hit record to capture your mic, or drop in an audio file. Your transcript appears in seconds, ready to copy or save.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- DOWNLOAD -->
+<section class="download-section" id="download">
+  <h2>Ready to try it?</h2>
+  <p>Works on Windows 10 and 11. No account required.</p>
+
+  <div style="display: flex; flex-direction: column; align-items: center; gap: 12px;">
+    <div class="download-card">
+      <div class="platform-icon">
+        <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+          <rect x="2" y="2" width="8" height="8" fill="white"/>
+          <rect x="12" y="2" width="8" height="8" fill="white"/>
+          <rect x="2" y="12" width="8" height="8" fill="white"/>
+          <rect x="12" y="12" width="8" height="8" fill="white"/>
+        </svg>
+      </div>
+      <div class="platform-info">
+        <div class="platform-name">WhisperDesk for Windows</div>
+        <div class="platform-meta">v1.0.0 · Windows 10 / 11 · 64-bit</div>
+      </div>
+      <a href="#" class="btn-primary" onclick="alert('The app is coming soon! Drop your email to be notified.'); return false;">
+        <svg width="15" height="15" viewBox="0 0 15 15" fill="none">
+          <path d="M7.5 2v8M5 8l2.5 2.5L10 8M2.5 12.5h10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        Download .exe
+      </a>
+    </div>
+    <p class="download-meta">Free · ~140MB · No account required</p>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-brand">WhisperDesk</div>
+  <div class="footer-note">Built with OpenAI Whisper · Runs locally on your machine</div>
+  <div class="footer-links">
+    <a href="#">GitHub</a>
+    <a href="#">Docs</a>
+  </div>
+</footer>
+
+</body>
+</html>

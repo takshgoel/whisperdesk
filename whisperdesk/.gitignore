@@ -1,0 +1,10 @@
+temp/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+whisperdesk.log
+*.egg-info/
+dist/
+build/
+.env

@@ -1,0 +1,19 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python -c \"import PyQt6; print\\(''PyQt6 OK'', PyQt6.__version__\\)\")",
+      "Bash(pip install:*)",
+      "Bash(python -c \"from PyQt6.QtWidgets import QApplication; from PyQt6.QtCore import Qt; print\\(''PyQt6 imports OK''\\)\")",
+      "Bash(python -c \"import styles; import transcriber; import recorder; print\\(''All modules import OK''\\)\")",
+      "Bash(python -c \"import ui; print\\(''ui.py imports OK''\\)\")",
+      "Bash(python -c \":*)",
+      "Bash(python -c \"import whisper, pathlib; p = pathlib.Path\\(whisper.__file__\\).parent; print\\(p\\); print\\(list\\(p.rglob\\(''*''\\)\\)[:20]\\)\")",
+      "Bash(python -c \"import torch, pathlib; p = pathlib.Path\\(torch.__file__\\).parent; print\\(p\\)\")",
+      "Bash(python -c \"import PyQt6, pathlib; p = pathlib.Path\\(PyQt6.__file__\\).parent; print\\(p\\)\")",
+      "Bash(python -c \"import sounddevice; print\\(sounddevice.__file__\\)\")",
+      "Bash(python -c \"import tiktoken, pathlib; p = pathlib.Path\\(tiktoken.__file__\\).parent; print\\(p\\); import tiktoken_ext; print\\(pathlib.Path\\(tiktoken_ext.__file__\\).parent\\)\")",
+      "Bash(python -c \"import tiktoken; print\\(tiktoken.__file__\\); import tiktoken_ext.openai_public; print\\(''tiktoken_ext OK''\\)\")",
+      "Bash(python -c \"import site; print\\(site.getsitepackages\\(\\)\\)\")"
+    ]
+  }
+}
